@@ -1,0 +1,300 @@
+---
+title: "Healthcare Analysis"
+author: "Oppy"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##### __Background__
+This report provides a comprehensive overview of key metrics that are vital for hospital management and policy-making. It helps in understanding the demographic profile of patients, the financial aspects of healthcare delivery, and the efficiency of hospital services, all of which are critical for informed decision-making by the hospital board.
+
+##### __Introduction__
+Healthcare is an important part of human existence and would usually come at a cost directly or indirectly. Directly in terms of paying out of pocket or indirectly through a founded program. Also, health challenges vary from person to person due to varying factors. Some health challenges are generally attributed to certain age groups while same may arise due to other socioeconomic factors or lifestyle. 
+
+##### __Objective__
+##### 1. To explore trends in the given healthcare dataset
+##### 2. Use visualization techniques to understand and communicate patterns in the dataset
+
+##### __Data Source__
+The data used in this analysis is a public dataset from Kaggle [kaggle](https://www.kaggle.com/).. A copy of the dataset can be obtained here: [Healthcare Dataset](https://www.kaggle.com/datasets/prasad22/healthcare-dataset)
+
+##### __Scope__
+##### * Explore the data
+##### * Descriptive statistics
+##### * Use visualization tools to present findings
+##### * Document each step in a communicable manner.
+
+##### __Process Flow__
+##### A. Install r 
+##### B. Install Rstudio
+##### C. Set work directory
+##### D. Install and load tidyverse - to input dataset into r & data manipulation.
+##### E. [Telescope your dataset](https://medium.com/@fadare.opeyemi/telescope-your-dataset-220bc380522b) - to gain an initial overview of the data
+##### F. Identify data types and convert as necessary
+
+##### __install package - tidyverse - used for data manipulation_
+```{r }
+options(repos = c(CRAN = "https://cran.rstudio.com"))
+install.packages("tidyverse")
+```
+
+##### __load tidayverse into the R session__
+
+```{r }
+library(tidyverse)
+```
+
+##### __importing your dataset__
+```{r}
+healthcare <- read.csv("healthcare_dataset.csv")
+View(healthcare)
+```
+
+##### __to have a quick view of the dataset__
+
+```{r}
+summary(healthcare)
+
+dim(healthcare) # return number of rows vs column
+str(healthcare)
+head(healthcare)
+tail(healthcare)
+class(healthcare)
+glimpse(healthcare)
+names(healthcare)
+```
+##### __the dataset can be grouped into three types of data__
+###### i. categorical
+###### ii. date
+###### iii. numeric
+
+##### __Categorical data__
+an initial review of the data suggest the following are categorical data to be converted to factors
+Gender, Blood.Type, Admission.Type, Test results
+```{r}
+healthcare$Gender <- as.factor(healthcare$Gender)
+healthcare$Blood.Type <- as.factor(healthcare$Gender)
+healthcare$Admission.Type <- as.factor(healthcare$Admission.Type)
+healthcare$Test.Results <- as.factor(healthcare$Test.Results)
+```
+
+##### __date date__
+###### __convert columns with date to date format__
+```{r}
+healthcare$Date.of.Admission <- as.Date(healthcare$Date.of.Admission, format="%d/%m/%Y")
+healthcare$Discharge.Date <- as.Date(healthcare$Discharge.Date, format="%d/%m/%Y")
+```
+
+###### __numeric data__
+```{r}
+summary(healthcare$Age)
+```
+##### __Findings__
+Basic descriptive statistics for the age variable. The minimum age is 18 years. 1st Qu. (First Quartile): 25% of the patients are aged 35 or younger.Median: the 50th percentile. Half of the patients are younger than 52 years, and half are older. Mean: The mean age in your dataset is approximately 51.45 years.3rd Qu. 75% of the patients are aged 68 or younger. Max The maximum age in your dataset is 85 years. These statistics give a general idea of the age distribution of the patients. The median and mean being close to each other suggests that the age distribution is fairly symmetrical. The range from the minimum to the maximum age (18 to 85 years) indicates the breadth of ages covered.
+
+
+##### __to check the skewness__
+###### __install the e1071 package__
+
+```{r}
+install.packages("e1071")
+```
+
+##### __to load the e1071 package__
+```{r}
+library(e1071)
+```
+
+##### __to check the skewness of age, Billing.Amount__
+```{r}
+age.skewness <- skewness(healthcare$Age)
+print(age.skewness)
+```
+###### __Findings__
+The skewness value for the Age variable is -0.01214421, which is very close to 0.
+This small negative value indicates a very slight skew to the left. However, given how close the value is to zero, it suggests that the age distribution of the patients is almost symmetrical. In practical terms, this means that the ages of the patients are fairly evenly distributed around the median, with no significant skew towards younger or older ages
+
+
+
+```{r}
+BillingAmount.skewness <- skewness(healthcare$Billing.Amount)
+print(BillingAmount.skewness)
+```
+###### __Findings__
+BillingAmount, data does not have a pronounced long tail on either the right or left side and is approximately symmetric. This symmetry means that there aren't extreme values (outliers) that are significantly distorting the distribution in one direction.
+
+
+##### __check if there is a relationship between the age and admission period__
+##### __check if there is a relationship between billing amount and admission period__
+
+#### __Unique Counts__
+
+```{r}
+Doctors <- unique(healthcare$Doctor)
+View(Doctors)
+```
+
+```{r}
+Medications <- unique(healthcare$Medication)
+View(Medications)
+```
+
+```{r}
+Test.Results <- unique(healthcare$Test.Results)
+View(Test.Results)
+```
+
+#### __Frequency Analysis__
+```{r}
+table(healthcare$Test.Results)
+```
+###### __Findings___
+The table indicates a relatively even distribution among the three categories of test results. This imply a diverse patient population with varying health conditions.
+
+##### __visualization__
+
+###### __to load the ggplot2__
+```{r}
+library(ggplot2)
+```
+
+##### __Histograms__ 
+###### 1. Age
+###### 2. Billing.Amount
+```{r}
+ggplot(healthcare, aes(x = Age)) +
+  geom_histogram(bins = 30, fill = "grey", color = "black") +
+  ggtitle("Age Distribution") +
+  xlab("Age") +
+  ylab("Frequency")
+```
+```{r}
+ggplot(healthcare, aes(x = Billing.Amount)) +
+  geom_histogram(bins = 30, fill = "grey", color = "black") +
+  ggtitle("Billing Amount Distribution") +
+  xlab("Billing Amount") +
+  ylab("Frequency")
+```
+
+##### __Bar chart__ 
+###### 1. Gender
+###### 2. Blood.Type
+###### 3. Medical.Condition
+
+```{r}
+ggplot(healthcare, aes(x = Gender, fill = Gender)) +
+  geom_bar() +
+  scale_fill_manual(values = c("black", "yellow")) +
+  ggtitle("Gender Distribution") +
+  xlab("Gender") +
+  ylab("Frequency")
+```
+
+###### Blood.Type
+
+```{r}
+ggplot(healthcare, aes(x = Blood.Type)) +
+  geom_bar(fill = "green") +
+  ggtitle("Blood Type Distribution") +
+  xlab("Blood Type") +
+  ylab("Frequency")
+```
+
+###### Medical.Condition
+
+```{r}
+ggplot(healthcare, aes(x = Medical.Condition)) +
+  geom_bar(fill = "grey") +
+  ggtitle("Medical Condition Distribution") +
+  xlab("Medical Condition") +
+  ylab("Frequency")
+```
+
+##### __Calculate the length of stay for each patient__
+
+```{r}
+healthcare$Length.of.Stay <- as.numeric(difftime(healthcare$Discharge.Date, healthcare$Date.of.Admission, units="days"))
+View(healthcare$Length.of.Stay)
+head(healthcare$Length.of.Stay)
+summary(healthcare$Length.of.Stay)
+```
+
+###### __Histogram for 'Length of Stay'__
+
+```{r}
+ggplot(healthcare, aes(x = Length.of.Stay)) +
+  geom_histogram(bins = 30, fill = "yellow", color = "black") +
+  ggtitle("Length of Stay Distribution") +
+  xlab("Length of Stay (days)") +
+  ylab("Frequency")
+```
+
+##### Correlation Analysis
+###### - Age
+###### - Billing Amount
+###### - Length of Stay
+
+```{r}
+cor(healthcare[c("Age", "Billing.Amount", "Length.of.Stay")], use = "complete.obs")
+```
+
+###### __Findings__
+
+Age and Billing.Amount: The correlation coefficient is approximately -0.0095, indicating a very weak negative correlation between age and billing amount. This suggests that there's almost no linear relationship between these two variables. Age and Length.of.Stay: The correlation coefficient is approximately 0.0091, suggesting a very weak positive correlation between age and length of stay. Again, this implies that there's almost no linear relationship. Billing.Amount and Length.of.Stay: The correlation coefficient is approximately -0.0135, indicating a very weak negative correlation between billing amount and length of stay. This suggests there's almost no linear relationship between these variables. 
+
+In summary, the output suggests that there are no strong linear relationships between age, billing amount, and length of stay among the patients. All these correlations are very close to zero, indicating that changes in one of these variables do not reliably predict changes in the others. 
+
+
+
+#### __Grouped Analyses__
+
+###### __Mean Age by Gender__
+
+```{r}
+aggregate(Age ~ Gender, data = healthcare, mean)
+```
+
+###### __Findings__
+The average age of both male and female patients are the same. All patient's regardless of their gender fall within the same age group.
+
+
+
+###### __Mean Billing Amount by Medical Condition__
+
+```{r}
+aggregate(Billing.Amount ~ Medical.Condition, data = healthcare, mean)
+```
+
+###### __Finding__
+For instance, the data suggests that on average, diabetes has the highest associated billing amount, while arthritis and hypertension have relatively lower average billing amounts.
+
+
+###### __Average Length of Stay by Admission Type__
+
+```{r}
+aggregate(Length.of.Stay ~ Admission.Type, data = healthcare, mean)
+```
+
+###### __Finding__
+Elective: The average length of stay is approximately 15.60 days. 
+Emergency: The average length of stay is approximately 15.61 days. 
+Urgent: The average length of stay is approximately 15.48 days. 
+These results suggest that the length of hospital stay is quite similar across the three types of admission, with very slight variations. In particular, there's only a marginal difference in the average length of stay between elective and emergency admissions.
+
+
+#### __Summary__
+
+##### __Overview of Patient Demographics and Admission Patterns__
+
+The analysis of the data set reveals insightful trends and characteristics about patient population and hospital admissions. Patient age range spans from 18 to 85 years, with a median and mean age close to 52 years, indicating a well-distributed age profile across young, middle-aged, and elderly patients. This diversity in age groups underscores the need for a wide range of medical services and specialized care to cater to the varied health needs of different age groups. Additionally, admissions data show a near-even split between genders, suggesting that healthcare services are accessed equally by both male and female patients. In terms of medical conditions, the average billing amounts vary slightly across different diagnoses such as Arthritis, Asthma, Cancer, Diabetes, Hypertension, and Obesity, but not significantly, pointing towards a consistent billing policy.
+
+##### __Analysis of Billing and Length of Stay__
+
+The financial aspect of healthcare services was examined through the billing amounts and length of stay associated with various medical conditions and admission types. The skewness of the billing amount distribution is remarkably low (0.0127), indicating a symmetrical distribution with no significant outliers, which suggests a consistent and equitable billing practice. This is crucial for maintaining trust and transparency with patients and their families. Furthermore, the average length of stay for patients, regardless of the admission type (Elective, Emergency, or Urgent), hovers around 15.5 days, suggesting effective and efficient patient care and hospital resource utilization. This consistency in length of stay, irrespective of the urgency of admission, demonstrates hospital's commitment to providing timely and quality care to all patients.
+
+
+
